@@ -33,7 +33,9 @@ def render_set_for_FPS_test(model_path, name, iteration, views, gaussians, pipel
     input: Keep the same input parameters as render_set(...)
     output: the output is a more accurate FPS.
     """
-    t_list_len = 1000
+    t_list_len = 200
+    warmup_times = 5
+    test_times = 10
     t_list = np.array([1.0] * t_list_len)
     step = 0
     fps_list = []
@@ -50,11 +52,11 @@ def render_set_for_FPS_test(model_path, name, iteration, views, gaussians, pipel
             t1 = time.time()
             t_list[step % t_list_len] = t1 - t0
 
-            if step % 100 == 0 and step > t_list_len:
+            if step % t_list_len == 0 and step > t_list_len * warmup_times:
                 fps = 1.0 / t_list.mean()
                 print(f'Test FPS: \033[1;35m{fps:.5f}\033[0m')
                 fps_list.append(fps)
-            if step > t_list_len * 2:
+            if step > t_list_len * (test_times + warmup_times):
                 # write fps info to a txt file
                 with open(os.path.join(model_path, "point_cloud", "iteration_{}".format(iteration), "FPS.txt"), 'w') as f:
                     f.write("Average FPS: {:.5f}\n".format(np.mean(fps_list)))
