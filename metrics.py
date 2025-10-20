@@ -30,7 +30,7 @@ def readImages(renders_dir, gt_dir):
     renders = []
     gts = []
     image_names = []
-    for fname in os.listdir(renders_dir):
+    for fname in tqdm(os.listdir(renders_dir), desc="Load images"):
         render = Image.open(renders_dir / fname)
         gt = Image.open(gt_dir / fname)
         renders.append(tf.to_tensor(render).unsqueeze(0)[:, :3, :, :])
@@ -82,9 +82,13 @@ def evaluate(model_paths):
                 
                 image_name = "{:05d}.png".format(idx)
                 gss.append(gs_data[image_name])
-                ssims.append(ssim(renders[idx].cuda(), gts[idx].cuda()))
-                psnrs.append(psnr(renders[idx].cuda(), gts[idx].cuda()))
-                lpipss.append(lpips_fn(renders[idx].cuda(), gts[idx].cuda()).detach())
+                renders[idx] = renders[idx].to(device)
+                gts[idx] = gts[idx].to(device)
+                ssims.append(ssim(renders[idx], gts[idx]))
+                psnrs.append(psnr(renders[idx], gts[idx]))
+                lpipss.append(lpips_fn(renders[idx], gts[idx]).detach())
+                renders[idx] = renders[idx].to('cpu')
+                gts[idx] = gts[idx].to('cpu')
 
             print("  SSIM : {:>12.7f}".format(torch.tensor(ssims).mean(), ".5"))
             print("  PSNR : {:>12.7f}".format(torch.tensor(psnrs).mean(), ".5"))
