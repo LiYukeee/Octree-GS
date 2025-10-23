@@ -514,7 +514,7 @@ if __name__ == "__main__":
     print(args.test_iterations)
 
     if args.save_iterations[0] == -1:
-        args.save_iterations = [i for i in range(10000, args.iterations + 1, 20000)]
+        args.save_iterations = [i for i in range(10000, args.iterations + 1, 10000)]
     if len(args.save_iterations) == 0 or args.save_iterations[-1] != args.iterations:
         args.save_iterations.append(args.iterations)
     print(args.save_iterations)
